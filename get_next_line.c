@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 12:19:30 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/02 12:40:46 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/02 13:09:24 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,14 @@ int	init_gnl(t_gnl *gnl, int fd)
 		gnl->buf = (char *)malloc(BUFFER_SIZE + 1);
 		if (!gnl->buf)
 			return (E_ALLOCATE);
+		gnl->buf[BUFFER_SIZE] = '\0';
 	}
 	gnl->line_size = BUFFER_SIZE;
 	gnl->line = (char *)malloc(gnl->line_size + 1);
 	if (!gnl->line)
 	{
 		free(gnl->buf);
+		gnl->buf = NULL;
 		return (E_ALLOCATE);
 	}
 	gnl->line[0] = '\0';
@@ -54,9 +56,13 @@ int	concat_char(t_gnl *gnl, ssize_t c)
 
 	if (gnl->line_index >= gnl->line_size)
 	{
+		gnl->line[gnl->line_index] = '\0';
 		new_line = ft_realloc(gnl->line, gnl->line_size * 2 + 1);
 		if (!new_line)
+		{
+			gnl->line = NULL;
 			return (E_ALLOCATE);
+		}
 		gnl->line = new_line;
 		gnl->line_size *= 2;
 	}
@@ -76,10 +82,12 @@ char	*get_next_line(int fd)
 	while (1)
 	{
 		c = fetch_char(&gnl);
-		if (c == EOF || concat_char(&gnl, c))
+		if (c == EOF || c == E_READ || concat_char(&gnl, c))
 		{
 			free(gnl.line);
 			free(gnl.buf);
+			gnl.buf = NULL;
+			gnl.line = NULL;
 			return (NULL);
 		}
 		if (c == '\n' || c == '\0')

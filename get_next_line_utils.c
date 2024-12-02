@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 13:29:32 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/02 12:34:38 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/02 13:07:19 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,11 @@ char	*ft_realloc(char *buf, ssize_t len)
 	char	*new;
 	int		i;
 
-	new = malloc(len + BUFFER_SIZE + 1);
-	if (!new)
+	if (buf == NULL)
 		return (NULL);
+	new = malloc(len);
+	if (!new)
+		return (free(buf), NULL);
 	i = 0;
 	while (buf[i])
 	{
