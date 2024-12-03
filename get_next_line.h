@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 13:29:13 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/02 12:34:29 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:06:09 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,27 @@
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42
 # endif
-# define E_READ -1
-# define E_ALLOCATE -2
 
-typedef struct s_gnl
+typedef enum s_opt
 {
-	int		fd;
-	char	*buf;
-	ssize_t	index;
+	O_NONE = 0,
+	O_READ,
+}			t_opt;
+typedef enum s_err
+{
+	E_NONE = 0,
+	E_READ,
+	E_ALLOCATE,
+	END_LINE,
+	END_FILE,
+}			t_err;
+
+typedef struct s_str
+{
+	char	*base;
 	ssize_t	size;
-	char	*line;
-	ssize_t	line_size;
-	ssize_t	line_index;
-}			t_gnl;
+	ssize_t	index;
+}			t_str;
 
 char		*ft_realloc(char *buf, ssize_t len);
 int			fetch_char(t_gnl *gnl);

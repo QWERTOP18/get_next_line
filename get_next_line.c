@@ -6,98 +6,92 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 12:19:30 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/02 13:09:24 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:23:57 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	init_gnl(t_gnl *gnl, int fd)
+t_err	allocate(t_str *str, t_opt opt, int fd)
 {
-	if (!gnl->buf)
-	{
-		gnl->fd = fd;
-		gnl->buf = (char *)malloc(BUFFER_SIZE + 1);
-		if (!gnl->buf)
-			return (E_ALLOCATE);
-		gnl->buf[BUFFER_SIZE] = '\0';
-	}
-	gnl->line_size = BUFFER_SIZE;
-	gnl->line = (char *)malloc(gnl->line_size + 1);
-	if (!gnl->line)
-	{
-		free(gnl->buf);
-		gnl->buf = NULL;
+	if (!str->base)
+		str->base = malloc(BUFFER_SIZE + 1);
+	if (!str->base)
 		return (E_ALLOCATE);
-	}
-	gnl->line[0] = '\0';
-	gnl->line_index = 0;
-	return (0);
-}
-
-int	fetch_char(t_gnl *gnl)
-{
-	if (gnl->index >= gnl->size)
+	str->size = BUFFER_SIZE;
+	str->index = 0;
+	if (opt == O_READ)
 	{
-		gnl->index = 0;
-		gnl->size = read(gnl->fd, gnl->buf, BUFFER_SIZE);
-		if (gnl->size < 0)
+		str->size = read(fd, str->base, BUFFER_SIZE);
+		if (str->size < 0)
 			return (E_READ);
-		gnl->buf[gnl->size] = '\0';
+		if (str->size == 0)
+			return (END_FILE);
 	}
-	if (gnl->size == 0)
-		return (EOF);
-	return (gnl->buf[gnl->index++]);
+	str->base[str->size] = '\0';
+	return (E_NONE);
 }
 
-int	concat_char(t_gnl *gnl, ssize_t c)
+t_err	reallocate(t_str *str)
 {
-	char	*new_line;
+	char	*new_base;
+	ssize_t	index;
 
-	if (gnl->line_index >= gnl->line_size)
+	index = 0;
+	new_base = malloc(str->size * 2 + 1);
+	if (!new_base)
+		return (free(str->base), E_ALLOCATE);
+	while (index < str->index)
 	{
-		gnl->line[gnl->line_index] = '\0';
-		new_line = ft_realloc(gnl->line, gnl->line_size * 2 + 1);
-		if (!new_line)
-		{
-			gnl->line = NULL;
-			return (E_ALLOCATE);
-		}
-		gnl->line = new_line;
-		gnl->line_size *= 2;
+		new_base[index] = str->base[index];
+		index++;
 	}
-	gnl->line[gnl->line_index++] = (char)c;
-	return (0);
+	str->base = new_base;
+	str->size *= 2;
+	new_base[str->size] = '\0';
+	free(str->base);
+	return (E_NONE);
+}
+
+t_err	process_char(t_str *buf, t_str *line, int fd)
+{
+	char	ch;
+	t_err	err;
+
+	if (buf->index >= buf->size)
+		err = allocate(buf, O_READ, fd);
+	if (line->index >= buf->size)
+		err = reallocate(line);
+	if (err)
+		return (err);
+	ch = buf->base[buf->index];
 }
 
 char	*get_next_line(int fd)
 {
-	int				c;
-	static t_gnl	gnl;
+	t_str			line;
+	static t_str	buf;
+	t_err			err;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) == -1)
 		return (NULL);
-	if (init_gnl(&gnl, fd) != 0)
-		return (NULL);
-	while (1)
+	line.base = NULL;
+	err = allocate(&line, O_NONE, fd);
+	err = allocate(&buf, O_READ, fd);
+	while (err == E_NONE)
 	{
-		c = fetch_char(&gnl);
-		if (c == EOF || c == E_READ || concat_char(&gnl, c))
-		{
-			free(gnl.line);
-			free(gnl.buf);
-			gnl.buf = NULL;
-			gnl.line = NULL;
-			return (NULL);
-		}
-		if (c == '\n' || c == '\0')
-			break ;
+		err = process_char(&buf, &line, fd);
 	}
-	gnl.line[gnl.line_index] = '\0';
-	return (gnl.line);
+	if (err == END_LINE || err == END_FILE) //) && line.index != 0)
+	{
+		return (line.base);
+	}
+	buf.size = 0;
+	buf.index = 0; // strfree
+	return (free(line.base), free(buf.base), NULL);
 }
 
-// #ifndef TEST
+// #ifdef TEST
 // # include <string.h>
 // int	main(int argc, char **argv)
 // {
@@ -112,12 +106,12 @@ char	*get_next_line(int fd)
 // 	while (1)
 // 	{
 // 		line = get_next_line(fd);
-// 		printf("%s", line);
 // 		if (!line)
 // 		{
 // 			free(line);
 // 			break ;
 // 		}
+// 		printf("%s", line);
 // 		free(line);
 // 	}
 // 	close(fd);
