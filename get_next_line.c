@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 12:19:30 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/03 17:23:57 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:32:34 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,12 @@ t_err	process_char(t_str *buf, t_str *line, int fd)
 		err = reallocate(line);
 	if (err)
 		return (err);
-	ch = buf->base[buf->index];
+	ch = buf->base[buf->index++];
+	line->base[line->index++] = ch;
+	line->base[line->index] = '\0';
+	if (ch == '\n')
+		return (END_LINE);
+	return (E_NONE);
 }
 
 char	*get_next_line(int fd)
@@ -82,39 +87,39 @@ char	*get_next_line(int fd)
 	{
 		err = process_char(&buf, &line, fd);
 	}
-	if (err == END_LINE || err == END_FILE) //) && line.index != 0)
+	if ((err == END_LINE || err == END_FILE) && line.index != 0)
 	{
 		return (line.base);
 	}
 	buf.size = 0;
-	buf.index = 0; // strfree
+	buf.index = 0;
 	return (free(line.base), free(buf.base), NULL);
 }
 
-// #ifdef TEST
-// # include <string.h>
-// int	main(int argc, char **argv)
-// {
-// 	int		fd;
-// 	char	*line;
+#ifndef TEST
+# include <string.h>
+int	main(int argc, char **argv)
+{
+	int		fd;
+	char	*line;
 
-// 	fd = 0;
-// 	if (argc > 1)
-// 		fd = open(argv[1], O_RDONLY);
-// 	if (fd < 0)
-// 		return (1);
-// 	while (1)
-// 	{
-// 		line = get_next_line(fd);
-// 		if (!line)
-// 		{
-// 			free(line);
-// 			break ;
-// 		}
-// 		printf("%s", line);
-// 		free(line);
-// 	}
-// 	close(fd);
-// 	return (0);
-// }
-// #endif
+	fd = 0;
+	if (argc > 1)
+		fd = open(argv[1], O_RDONLY);
+	if (fd < 0)
+		return (1);
+	while (1)
+	{
+		line = get_next_line(fd);
+		if (!line)
+		{
+			free(line);
+			break ;
+		}
+		printf("%s", line);
+		free(line);
+	}
+	close(fd);
+	return (0);
+}
+#endif

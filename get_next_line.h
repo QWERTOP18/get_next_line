@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 13:29:13 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/03 17:06:09 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:27:08 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,5 @@ typedef struct s_str
 	ssize_t	size;
 	ssize_t	index;
 }			t_str;
-
-char		*ft_realloc(char *buf, ssize_t len);
-int			fetch_char(t_gnl *gnl);
-int			concat_char(t_gnl *gnl, ssize_t c);
-char		*get_next_line(int fd);
-int			init_gnl(t_gnl *gnl, int fd);
 
 #endif
