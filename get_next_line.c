@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 18:47:25 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/04 22:18:49 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/04 22:36:49 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ char	*get_next_line(int fd)
 // 	fd = open("s.txt", O_RDONLY);
 // 	while ((line = get_next_line(fd)) != NULL)
 // 	{
-// 		printf("%s\n", line);
+// 		printf("line=%s\n", line);
 // 		free(line);
 // 	}
 // 	close(fd);

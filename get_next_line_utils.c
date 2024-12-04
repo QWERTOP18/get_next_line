@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 13:29:32 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/04 22:16:42 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/04 22:35:11 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ t_err	allocate(t_str *str, t_opt opt, int fd)
 		str->size = read(fd, str->base, BUFFER_SIZE);
 		if (str->size < 0)
 			return (E_READ);
+		str->base[str->size] = '\0';
 		if (str->size == 0)
 			return (END_FILE);
 	}
