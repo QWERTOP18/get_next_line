@@ -6,7 +6,7 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 13:29:13 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/03 17:27:08 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/04 21:58:25 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <stdlib.h>
 # include <unistd.h>
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 42
+#  define BUFFER_SIZE 10
 # endif
 
 typedef enum s_opt
@@ -41,5 +41,9 @@ typedef struct s_str
 	ssize_t	size;
 	ssize_t	index;
 }			t_str;
-
+char		*get_next_line(int fd);
+t_err		process_char(t_str *buf, t_str *line, int fd);
+t_err		allocate(t_str *str, t_opt opt, int fd);
+t_err		reallocate(t_str *str);
+void		release(t_str *str);
 #endif

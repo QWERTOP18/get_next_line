@@ -6,29 +6,61 @@
 /*   By: ymizukam <ymizukam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 13:29:32 by ymizukam          #+#    #+#             */
-/*   Updated: 2024/12/02 13:07:19 by ymizukam         ###   ########.fr       */
+/*   Updated: 2024/12/04 22:16:42 by ymizukam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_realloc(char *buf, ssize_t len)
+t_err	allocate(t_str *str, t_opt opt, int fd)
 {
-	char	*new;
-	int		i;
-
-	if (buf == NULL)
-		return (NULL);
-	new = malloc(len);
-	if (!new)
-		return (free(buf), NULL);
-	i = 0;
-	while (buf[i])
+	if (!str->base)
+		str->base = malloc(BUFFER_SIZE + 1);
+	if (!str->base)
+		return (E_ALLOCATE);
+	str->size = BUFFER_SIZE;
+	str->index = 0;
+	if (opt == O_READ)
 	{
-		new[i] = buf[i];
-		i++;
+		str->size = read(fd, str->base, BUFFER_SIZE);
+		if (str->size < 0)
+			return (E_READ);
+		if (str->size == 0)
+			return (END_FILE);
 	}
-	new[i] = '\0';
-	free(buf);
-	return (new);
+	str->base[str->size] = '\0';
+	return (E_NONE);
+}
+
+t_err	reallocate(t_str *str)
+{
+	char	*new_base;
+	ssize_t	index;
+
+	index = 0;
+	new_base = malloc(str->size * 2 + 1);
+	if (!new_base)
+	{
+		free(str->base);
+		str->base = NULL;
+		return (E_ALLOCATE);
+	}
+	while (index < str->index)
+	{
+		new_base[index] = str->base[index];
+		index++;
+	}
+	str->size *= 2;
+	new_base[str->size] = '\0';
+	free(str->base);
+	str->base = new_base;
+	return (E_NONE);
+}
+
+void	release(t_str *str)
+{
+	free(str->base);
+	str->base = NULL;
+	str->size = 0;
+	str->index = 0;
 }
